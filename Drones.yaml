@@ -3,15 +3,15 @@ drones:
   - ID: 1
     name: drone1
     type: SuperMicro
-    pubIP: 192.168.0.1
-    IPMI_IP: 10.0.1.2
+    frontIP: 192.168.0.1
+    backIP: 10.0.1.2
     username: ADMIN
     password: ADMIN
      
   - ID: 2
     name: drone2
     type: Dell
-    pubIP: 192.168.0.2
-    IPMI_IP: 10.0.2.2
+    frontIP: 192.168.0.2
+    backIP: 10.0.2.2
     username: ADMIN
     password: ADMIN
