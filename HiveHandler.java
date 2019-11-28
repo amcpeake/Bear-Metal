@@ -26,17 +26,17 @@ import java.util.stream.Collectors;
  */
 
 public class HiveHandler extends ServerResource {
-    private static final Logger log = LoggerFactory.getLogger(HiveHandler.class);
-    private static final DroneController droneController = DroneController.getInstance();
+	private static final Logger log = LoggerFactory.getLogger(HiveHandler.class);
+	private static final DroneController droneController = DroneController.getInstance();
     
-    // Specifies accepted HTTP methods
-    @Get
-    @Post
-    public void accept(){}
+	// Specifies accepted HTTP methods
+	@Get
+	@Post
+	public void accept(){}
 
-    // Class entrypoint; Parses user JSON and passes it to handleRequest()
-    @Override
-    public void doInit() {
+	// Class entrypoint; Parses user JSON and passes it to handleRequest()
+	@Override
+	public void doInit() {
         JSONObject requestJSON = new JSONObject();
         
         try {
@@ -87,28 +87,28 @@ public class HiveHandler extends ServerResource {
 
                 case "poweron": // Powers on drone
                     if (droneController.powerOn(drone)) {
-                        responseJSON.put("msg", drone.name + " powered on");
+                        responseJSON.put("msg", drone.getName() + " powered on");
                         break;
                     }
 
-                    throw new APIAccessException(drone.name + " failed to power on", 500);
+                    throw new APIAccessException(drone.getName() + " failed to power on", 500);
 
                 case "poweroff": // Power off drone
                     if (droneController.powerOff(drone)) {
-                        responseJSON.put("msg", drone.name + " powered off");
+                        responseJSON.put("msg", drone.getName() + " powered off");
                         break;
                     }
 
-                    throw new APIAccessException(drone.name + " failed to power off", 500);
+                    throw new APIAccessException(drone.getName() + " failed to power off", 500);
 
                 case "getsnapshot": // Check if drone is running an OS
                     if (droneController.hasSnapshot(drone)) {
-                        responseJSON.put("msg", drone.name + " is running " + droneController.getSnapshot(drone));
+                        responseJSON.put("msg", drone.getName() + " is running " + droneController.getSnapshot(drone));
                         responseJSON.put("snapshot", true);
                         break;
                     }
 
-                    responseJSON.put("msg", drone.name + " does not have a running OS");
+                    responseJSON.put("msg", drone.getName() + " does not have a running OS");
                     responseJSON.put("snapshot", false);
                     break;
 
@@ -124,11 +124,11 @@ public class HiveHandler extends ServerResource {
                     }
 
                     if (droneController.setSnapshot(drone, os)) {
-                        responseJSON.put("msg", drone.name + " is successfully running " + os.name);
+                        responseJSON.put("msg", drone.getName() + " is successfully running " + os.getName());
                         break;
                     }
 
-                    throw new APIAccessException("Failed to set OS on " + drone.name, 500);
+                    throw new APIAccessException("Failed to set OS on " + drone.getName(), 500);
 
                 case "getdrones": // Build a list of available drones, their status, OS, IPMI info
                     List<Drone> drones;
@@ -144,16 +144,16 @@ public class HiveHandler extends ServerResource {
 								{
 									try {
 										return new JSONObject() {{
-												put("name", d.name);
+												put("name", d.getName());
 										        put("status", droneController.getStatus(d) ? "on" : "off");
 										        put("OS", (droneController.getSnapshot(d)) == null ? "" : droneController.getSnapshot(d));
 										        put("registree", d.getRegistree() == null ? "" : d.getRegistree());
-										        put("type", d.type);
-										        put("IP", d.pubIP);
-										        put("ID", d.ID);
+										        put("type", d.getType());
+										        put("IP", d.getFrontIP());
+										        put("ID", d.getID());
 										        put("IPMI", new JSONObject() {{
-										                put("user", d.username);
-										                put("password", d.password);
+										                put("user", d.getUsername());
+										                put("password", d.getPassword());
 										        }});
 										}};
 									} catch (Exception e) {}
@@ -175,7 +175,7 @@ public class HiveHandler extends ServerResource {
                 case "register": // Assign a user's name to a drone
                     if (drone.getRegistree() == null) {
                         drone.setRegistree(requestJSON.get("registree").toString());
-                        responseJSON.put("msg", "Successfully registered " + drone.name + " to " + requestJSON.get("registree"));
+                        responseJSON.put("msg", "Successfully registered " + drone.getName() + " to " + requestJSON.get("registree"));
                         break;
                     }
 
@@ -185,11 +185,11 @@ public class HiveHandler extends ServerResource {
                 case "unregister": // Reset drone to default configuration and remove registration
                     if (droneController.removeSnapshot(drone)) {
                         drone.setRegistree(null);
-                        responseJSON.put("msg", "Successfully unregistered " + drone.name);
+                        responseJSON.put("msg", "Successfully unregistered " + drone.getName());
                         break;
                     }
 
-                    throw new APIAccessException("Failed to unregister " + drone.name, 500);
+                    throw new APIAccessException("Failed to unregister " + drone.getName(), 500);
 
                 default:
                     throw new APIAccessException(requestJSON.get("action").toString() + " is not a valid action", 400);
